@@ -1,0 +1,1530 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[style=english]{csquotes}
+\usepackage[spanish,catalan,english]{babel}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ mathrsfs }
+\usepackage{verbatim}
+\usepackage[toc,page]{appendix}
+\usepackage[table,xcdraw]{xcolor}
+
+%% Bibliography
+\usepackage[sorting=none]{biblatex}
+%\DefineBibliographyStrings{english}{
+%  bibliography = {References},
+%}
+\addbibresource{My_Library.bib}
+% If you want to break on URL numbers
+\setcounter{biburlnumpenalty}{9000}
+% If you want to break on URL lower case letters
+\setcounter{biburllcpenalty}{9000}
+% If you want to break on URL UPPER CASE letters
+\setcounter{biburlucpenalty}{9000}
+
+% Custom enumerate
+\usepackage{enumitem}
+
+% gaussian binomial coefficient
+\newcommand{\gaussian}{\genfrac{[}{]}{0pt}{}}
+
+% horizontal line for matrix
+\newcommand*{\horzbar}{\rule[.5ex]{2.5ex}{0.5pt}}
+
+%amsmath enviroments
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+%\newtheorem{definition}{Definition}[section]
+\newtheorem{example}[theorem]{Example}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+%paragraph spacing and indent
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{15pt} %default is 15
+
+%equation numbering
+%\renewcommand{\theequation}{\arabic{section}.\arabic{equation}}
+\makeatletter
+\renewcommand\theequation{\arabic{equation}}
+\makeatother
+
+%% Assemble the document
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        \vspace{1cm}
+        \Huge
+        \textbf{Translation Association Schemes}
+
+        \vspace{0.5cm}
+        \LARGE
+        A brief introduction
+
+        \vspace{1.5cm}
+
+       \textbf{Joel González}
+
+       \vfill
+    \end{center}
+\end{titlepage}
+
+\pagenumbering{roman}
+\clearpage
+\pagenumbering{arabic}
+
+\section{Introduction}
+
+This document attemps to provide an introduction to the topic of translation
+association schemes. During my bachelor's thesis, which dealt with rank-metric
+codes, I had to learn from scratch all of the main identities and
+theorems of translation association schemes, and I found that there was not much
+content available on the internet. Furthermore, some of the main sources regarding
+them (which are cited throughout this document) were very hard to come by, and
+I could only get access to them researchers at my university who happened to have them.
+The content presented here is mostly self-contained,
+only requiring basic concepts of group theory and linear algebra which anyone
+studying a bachelor's in mathematics will be familiar with; hopefully it will
+be useful to the reader who is not yet familiar with association schemes and
+wants a quick but detailed overview of the properties of translation association
+schemes, with all the necessary proofs.
+
+Association schemes are one of the more relevant objects of algebraic combinatorics.
+They are no more than special partitions of finite sets, but their particular
+structure has been studied thoroughly and a there is a very rich set of results
+and identities.
+
+We start by defining association schemes.
+\begin{definition}
+    \label{def:association_scheme_partition}
+    Let $ X $ be a finite set. An \textbf{association scheme} with $ d $ classes is a
+    pair $ (X, \mathcal{R}) $ such that
+    \begin{enumerate}[label=(\roman*)]
+        \item $ \mathcal{R} = \{ R_0, R_1, \dots, R_d \} $ is a partition of
+            $ X \times X $;
+        \item $ R_0 = \Delta := \{ (x,x) \mid x \in X \} $;
+        \item \label{as_sym}
+            For any $ i \in \{ 0,1,\dots,d \} $, $ R_i^T := \{ (y,x) \mid
+            (x,y) \in R_i \} $ is a class in $ \mathcal{R} $;
+        \item For any $ i,j,k \in \{ 0,1,\dots,d \} $ there is a constant,
+            $ p_{ij}^k $, such that, for any $ (x,y) \in R_k $, $ p_{ij}^k $ counts
+            the number of $ z \in X $ such that $ (x,z) \in R_i $ and
+            $ (z,y) \in R_j $;
+        \item \label{as_com}
+            For all $ i,j,k \in \{ 0,1,\dots, d \} $, $ p_{ij}^k = p_{ji}^k $.
+    \end{enumerate}
+\end{definition}
+Some authors do not assume property \ref{as_com}, refer association schemes with
+this property as commutative association schemes. In this section we will assume
+all association schemes to be commutative.
+
+In coding theory, we are usually working with association schemes
+where the relation is symmetric:
+\begin{definition}
+    \label{def:sym_association_scheme_partition}
+    We say that an association scheme is \textbf{symmetric} if, instead of \ref{as_sym}, it
+    holds that
+    \[ R_i = R_i^T, \forall i \in \{ 0,1,\dots,d \} \]
+\end{definition}
+Unless specified otherwise, any association schemes mentioned from now on will
+be symmetric\footnote{For a very thorough introduction to non-symmetric association
+schemes and related algebraic concepts, see University of Waterloo's notes from
+Godsil \cite{godsil_online}}. Note that for symmetric association schemes, \ref{as_com}
+is not an axiom but rather a consequence of all the other axioms.
+
+\section{The theory of association schemes}
+In this section, we will go over the existence of the
+basis of idempotent matrices in the Bose-Mesner algebra. To do this, we will
+be mostly following Godsil's \parencite{godsil_erdoskorado_2015} which, instead of
+relying on
+know results of linear algebra, gives a more combinatorial construction of the
+basis of idempotents. Brouwer et al.'s \parencite{brouwer_distance-regular_1989} and
+and Van Lint and Wilson's \parencite{van_lint_course_2001} were also consulted to
+obtain some intermediate results.
+
+In symmetric association schemes, the number $ n_i := p_{ii}^0 $, called the
+\textbf{valency} of $ R_i $, is the number of $ z \in X $ such that
+$ (x,z) \in R_i $. Therefore, it holds that
+\[ n := \mid X \mid = \sum_{ i=0 }^{ d } n_{ii}^0 \]
+Note that $ n_0 = 1 $.
+
+We now state some useful properties of the coefficients of association schemes.
+\begin{lemma}[{\parencite[Lemma 2.1.1]{brouwer_distance-regular_1989}}]
+    The parameters $ n_i$ and $ p_{ij}^k $ of an association scheme with $ d $
+    classes satisfy the following:
+    \begin{enumerate}[label=(\roman*)]
+        \item $ p_{0j}^k = \delta_{jk} $,
+        \item $ p_{ij}^0 = \delta_{ij}n_j $,
+        \item $ p_{ij}^k = p_{ji}^k $,
+    \end{enumerate}
+    \begin{proof}
+        \begin{enumerate}[label=(\roman*)]
+        \item Note that $ (x,z) \in R_0 \iff x = z $. If $ j = k $, then it is
+            clear that $ p_{0j}^k = 0 $. If $ j \neq 0 $, then there is one
+            $ (x,y) \in R_k - R_j $, so for that $ (x,y) $ there are no $ z\in X $
+            such that $ (x,z) = (x,x) \in R_0 $ and $ (z,y) = (x,y) \in R_j $,
+            therefore $ p_{0j}^k $.
+        \item If $ i = j $, by definition $ p_{jj}^0 = n_j $. Suppose
+            $ i \neq j $ and $ p_{ij}^k >= 1 $. Then, for every $ x \in X $,
+            $ (x,x) \in R_0 $ and there is at least one $ z \in X $ such that
+            $ (x,z) \in R_i \iff (z, x) \in R_i $ and $ (z,x) \in R_j $, so
+            $ (z,x) \in R_i \cap R_j $, which is a contradiction with the fact
+            that $ \mathcal{R} $ is a partition of $ X \times X $.
+        \item Given $ i,j,k \in \{ 0,1,\dots,d \} $, for any $ (x,y) \in R_k
+            \iff (y,x) \in R_k $,
+            $ (x,z) \in R_i \iff (z,x) \in R_i $ and $ (z,y) \in R_j \iff
+            (y,z) \in R_j$, so it is clear that $ p_{ij}^k = p_{ji}^k $.
+             \end{enumerate}
+    \end{proof}
+
+\end{lemma}
+
+One can view an association scheme as a complete graph with labeled edge:
+the vertices are the elements in $ X $ and there is an edge with label $ i $
+between two vertices $ x,y \in X $ if and only if $ (x,y) \in R_i $. The subgraph
+obtained by only selecting the edges labeled $ i $ is usually denoted by
+$ X_i $.
+
+We define the \textbf{adjancecy matrices} of an association scheme as the association
+matrices of each subgraph $ X_i $, that is,
+\[
+    \begin{cases}
+        (A_i)_{xy} = 1 &\text{ if } (x,y) \in R_i \\
+        0 &\text{ otherwise}
+    \end{cases}
+\]
+These are clearly $ n \times n $ symmetric matrices, and
+\[ A_0 = I \]
+\[ A_0 + A_1 + \dots + A_d = J \]
+where $ I $ is the $ n \times n $ identity matix and $ J $ is the $ n \times n $
+matrix with all coefficients $ 1 $. This induces an equivalent definition of
+association schemes in terms of matrices, which is also commonly used in the
+literature (\parencite[Chapter 3]{godsil_erdoskorado_2015}).
+\begin{definition}
+    A (commutative, not necessarily symmetric) association scheme is a set of
+    $ n \times n $ $ \{ 0,1 \} $-matrices $ \mathcal{A} = \{ A_0, A_1, \dots, A_d \} $
+    with the following properties:
+    \begin{enumerate}[label=(\roman*)]
+        \item $ \sum_{ i=1 }^{ k } = J $;
+        \item $ A_0 = I $;
+        \item \label{as_mat_rel} $ A_i^T \in \mathcal{A} $ for all
+            $ i \in \{ 0,1, \dots, d \} $;
+        \item for all $ i,j \in \{ 0,1, \dots, d \} $, the matrix product
+            $ A_i A_j $ is in the span of $ \mathcal{A} $;
+        \item $ A_i A_j = A_j A_i $ for all $ i $ and $ j $.
+    \end{enumerate}
+\end{definition}
+It is immediate that the first three axioms of this definition are equivalent
+to the first three in the definition based on relations. The last two are also
+equivalent:
+\begin{proof}
+    We define $ p_{ij}^k $ as the coefficient of $ A_k $ when we express $ A_iA_j $
+    as an element in the span of $ \mathcal{A} $, that is,
+    \[ A_iA_j = \sum_{ k=0 }^{ d } p_{ij}^k A_k \]
+    We now prove that this definition is equivalent to the one given previously.
+    Note that $ (A_i A_j)_{xy} $ is the number of $ z \in X $ such that
+    $ (A_i)_{xz} = 1 $ and $ (A_j)_{zy} = 1 $. From \ref{as_mat_rel}, we deduce
+    that, for every $ x,y $ and every $ i,j \in \{ 0,1,\dots,d \} $, either
+    $ (A_i)_{xy} = 0 $ or $ (A_j)_{xy} = 0 $. Therefore, fixing $ k,i,j
+    \in \{ 0,1,\dots,d \}$, it is clear that for any $ (A_k)_{xy} $ the number
+    of $ z \in X $ such that $ (A_i)_{xz} $ and $ (A_j)_{zy} $ is precisely
+    the coefficient $ p_{ij}^k $ and that this coefficient is independent of
+    the choice of $ x,y $.
+\end{proof}
+The definition of symmetric association schemes based on matrices is analogous.
+\\
+The set $ \mathcal{A} $ clearly forms an algebra with respect to
+the matrix multiplication. Furthermore, $ \mathcal{A} \cup \{ 0 \} $ forms an
+algebra with respect to the \textbf{Hadamard} or \textbf{Schur} product, which
+is defined as
+\[ (A \circ B)_{xy} = A_{xy}B_{xy} \]
+This is immediate from the fact that all matrices in the association scheme are
+Schur orthogonal and Schur idempotent, that is,
+\[
+    A_i \circ A_j = \begin{cases}
+        A_i &\text{ if } i = j \\
+        0 &\text{ otherwise}
+    \end{cases}
+\]
+It is also immediate that the matrices are linearly independent.
+
+We will denote the linear span of $ \mathcal{A} $ over the complex numbers by
+$ \mathbb{C}(\mathcal{A}) $. In the literature, $ \mathbb{C}(\mathcal{A}) $ is
+often referred to as the \textbf{Bose-Mesner} algebra of $ \mathcal{A} $.
+
+All of this is summed up in the following lemma:
+
+\begin{lemma}
+    The Bose-Mesner algebra of an association scheme $ \mathcal{A} $,
+    $ \mathbb{C}(\mathcal{A})  $, is a commutative matrix algebra with identity,
+    which is closed under transposition and contains the all-ones matrix.
+    \label{lm:ekr_bose_mesner}
+\end{lemma}
+
+The Bose-Mesner algebra is interesting because a basis of orthogonal idempotent
+matrices exists for it. In the literature, this is commonly deduced using known
+results of linear algebra, since the fact that the $ A_i $ commute implies that
+they can be simultaneously diagonalized (\cite{brouwer_distance-regular_1989},
+\cite{van_lint_course_2001}). However, a combinatorial construction of this
+basis is provided in \cite{godsil_erdoskorado_2015}, which we will develop in
+the next couple of pages.
+
+\begin{theorem}[{\parencite[Theorem 3.4.1]{godsil_erdoskorado_2015}}]
+    Let $ M $ be a commutative matrix algebra with identity over $ \mathbb{C} $.
+    Assume that, for all $ N \in M $, it holds that $ N^2 = 0 $ only if $ N = 0 $.
+    Then, each matrix in $ M $ can be expressed as a linear combination of
+    pairwise othogonal independents.
+    \label{th:ekr_commutative}
+\end{theorem}
+\begin{proof}
+    Suppose $ A \in M $. Call $ m_A $ the minimal polynomial of $ A $, with
+    \[ m_A(x) = \prod_{ i=1 }^{ k } (x-\alpha_i)^{\lambda_i} \]
+    We now define
+    \[ m_{A,i}(x) = \frac{m_A(x)}{(x-\alpha_i)^{\lambda_i}} \]
+    Note that $ m_{A,1}, \dots, m_{A,k} $ are coprime by definition and that they
+    are univariate polynomials over a field. Therefore, Bezout's identity states that
+    there are $ f_1(x), \dots, f_k(x) \in \mathbb{C}[X] $ such that
+    \[ f_1(x)m_{A,1}(x) + \dots + f_k(x)m_{A,k}(x) = 1 \]
+    If we replace by $ A $, we find that
+    \begin{equation}
+        f_1(A)m_{A,1}(A) + \dots + f_k(A)m_{A,k}(A) = I
+        \label{bezout_eq}
+    \end{equation}
+    We will use this identity to find the idempotent matrices. Define
+    $ E_i = f_i(A)m_{A,i}(A) $. First of all, we see that they are pairwise orthogonal.
+    If $ i \neq j $, then it is clear that $ m_{A,i}m_{A_j} $ is a
+    multiple of $ m_A $, so
+    \[ m_{A,i}m_{A,j} = 0 \]
+    Therefore, $ E_iE_j = 0 $, i.e., they are pairwise othogonal.
+
+    We can use this to see that the $ E_i $ are idempotent. If we multiply
+    \ref{bezout_eq} by $ E_i $ for a given $ i \in \{ 1,\dots,k \} $, we get that:
+    \[ E_i(E_1 + \dots E_k) = E_iI \iff E_i^2 = E_i \]
+    The only thing left to show is that $ A $ is a linear combination of these $ E_i $.
+    It is immediate that $ (x-\alpha_i)^{\lambda_i}f_i(x) $ is a multiple of $ m_A(X) $,
+    so it holds that
+    \[ (A-\alpha_iI)^{\lambda_i}E_i = 0 \]
+    Using the fact that $ E_i $ is idempotent,
+    \[ ((A-\alpha_iI)E_i)^{\lambda_i} = 0 \]
+
+    Note that, by hypothesis, $ N^2 = 0 \Rightarrow N = 0 $ for every $ N \in M $.
+    This also implies that $ N^n = 0 \Rightarrow N = 0 $, which we can prove by
+    induction: if we suppose that $ N^{k} = 0 \iff N = 0 $ for all $ 1 <= k <= n-1 $
+    \[ N^n = 0 \Rightarrow N^{n + (n\pmod{2})} = 0 \Rightarrow (N^{\frac{n+(n\pmod{2})}{2}})^2 = 0
+    \Rightarrow N^{\frac{n+(n\pmod{2})}{2}} = 0 \Rightarrow N = 0 \]
+
+    Therefore, from the previous identity we deduce that $ (A-\alpha_iI)E_i = 0
+    \iff A E_i = \alpha_i E_i$. Multiplying \ref{bezout_eq} by $ A $, we now get
+    that
+    \[ A = AE_i + \dots + AE_k = \alpha_1 E_1 + \dots + \alpha_k E_k \]
+    so $ A $ can be expressed as a linear combination of pairwise othogonal
+    idempotents. Note that from $ AE_i = \alpha_i E_i $ we get that the columns of
+    $ E_i $ are eigenvectors of A with eigenvalue $ \alpha_i $.
+
+\end{proof}
+
+We will now prove that this theorem's hypothesis holds for the Bose-Mesner algebra
+of any association scheme.
+
+\begin{lemma}[{\parencite[Lemma 3.4.2]{godsil_erdoskorado_2015}}]
+    If $ N $ and $ N^* $ commute, then $ N^2=0 \Rightarrow N=0 $.
+    \label{lm:ekr_N2}
+\end{lemma}
+\begin{proof}
+    If $ N $ and $ N^2 $ commute and $ N^2=0 $, then it holds that
+    \[ 0 = (N^*)^2 N^2 = (N^*N)^2 \]
+    which implies that
+    \[ 0 = tr((N^*N)^2) = tr((N^*N)^*(N^*N)) \]
+    It is easy to show that $ tr(H*H) = 0 \Rightarrow H = 0 $ for any matrix $ H $
+    with coefficients in $ \mathbb{C} $. Note that
+    \[ (H^*H)_{ii} = \sum_{ j=1 }^{ n } \overline{H_{ji}}H_{ji} \]
+    which is a positive real number. Therefore,
+    \[ tr(H^*H) = 0 \Rightarrow \sum_{ j=1 }^{ n } \overline{H_{ji}}H_{ji} = 0,
+        \forall i \Rightarrow \overline{H_{ji}}H_{ji} = 0, \forall i,j
+        \Rightarrow H_{ji} = 0, \forall i,j \]
+    We now use this to deduce that $ N^*N = 0 $. Applying the same argument, we
+    conclude that $ N = 0 $.
+\end{proof}
+
+One can define a partial ordering on the idempotent matrices of a commutative
+algebra. For any two idempotent $ E $ and $ F $, we write $ E \leq F $ if
+$ FE = E $. This relation is clearly a partial order:
+\begin{enumerate}
+    \item Reflexive: $ E^2 = E $ because $ E $ is idempotent.
+    \item Transitive: $ FE = E $ and $ GF = F $ implies $ GE = GFE = FE = E $.
+    \item Antisymmetric: if $ FE = E $ and $ EF = F $, since they commute we have
+        that $ E = FE = EF = F $.
+\end{enumerate}
+Note that the fact that $ FE = E $ implies that the column space of $ E $ is
+a subspace of the colunm space of $ F $:
+\begin{proof}
+    If $ c = ( c_1,\dots,c_n) $ is a column in $ E $, and $ f_1, \dots, f_n $
+    are the columns of $ F $, then
+    \[ Fc = c \iff c_1f_1 + \dots + c_kf_k = c \]
+    which implies that $ c \in \langle f_1, \dots, f_k \rangle $.
+\end{proof}
+
+We will call a \textbf{minimal idempotent} a minimal element of the set of
+nonzero idempotent
+matrices with respect to this order, i.e., an idempotent matrix $ A $ is minimal
+if there is no other non-zero idempotent matrix $ F $, $ F \neq E $, such that
+$ F \leq E $.
+This concept will be useful in that there is a basis of idempotent matrices for
+the Bose-Mesner algebra of any association scheme.
+
+\begin{lemma}[{\parencite[Lemma 3.4.3]{godsil_erdoskorado_2015}}]
+    Any set of idempotent matrices in a commutative algebra contains a subset of
+    minimal idempotent matrices. Furthermore, these minimal idempotent matrices
+    are pairwise orthogonal.
+    \label{lm:ekr_minimal}
+\end{lemma}
+\begin{proof}
+    Suppose that $ E $ and $ F $ are distinct idempotents in a commutative algebra,
+    $ E \leq F \iff FE = E $. Then,
+    \[ F-E \neq 0 \iff F - FE \neq 0 \iff F(I-E) \neq 0 \]
+    Since $ E $ is idempotent, we have that
+    \[ E(I-E) = 0 \]
+    From this and the previous inequality we can deduce that the span of $ E $'s
+    columns cannot be the same as the span of $ F $'s columns, and since $ E \leq F $
+    we get that the former is strictly contained in the latter. This implies that
+    if $ E \leq F $, then the dimension of the vector subspace generated by the columns of
+    $ E $ is strictly smaller that the dimension of the vector subspace generated
+    by the columns of $ F $. Now, suppose that $ E_1, \dots, E_m $ are distint
+    non zero idempotent matrices of a commutative algebra, such that
+    \[ E_1 \leq \dots \leq E_m \]
+    hen, $ m $ must be bounded by the number of columns in these matrices, i.e.,
+    all chains in the partial order contain a finite number of elements and
+    so they must have a minimal element. This proves that there is a set of
+    minimal idempotent matrices.
+
+    Suppose now that $ E $ and $ F $ are distinct minimal idempotent matrices.
+    It is immediate that $ EF \leq E $ and $ FE \leq F $. Therefore, $ EF = FE
+    = 0 $, and they are pairwise orthogonal.
+\end{proof}
+
+\begin{theorem}[{\parencite[Theorem 3.4.4]{godsil_erdoskorado_2015}}]
+    Let $ \mathcal{A} $ be an association scheme and $ \mathbb{C}(\mathcal{A}) $
+    its its Bose-Mesner algebra. Then $ \mathbb{C}(\mathcal{A}) $ has a basis of
+    pairwise othogonal idempotet matrices $ \{ E_0, \dots, E_d \} $. Furthermore,
+    this basis satisfies the following properties:
+    \begin{enumerate}[label=(\roman*)]
+        \item $ E_0 = \frac{1}{n}J $;
+        \item $ \sum_{ i=0 }^{ d } E_i = I $;
+        \item $ E_i^T \in \{ E_0, \dots, E_d \} $ for all $ i \in \{ 0,1,\dots,d \} $;
+        \item for any $ i,j \in \{ 0,1,\dots,d \} $, $ E_i \circ E_j $ is in
+            $ \mathbb{C}(\mathcal{A}) $;
+        \item $ E_iE_j = \delta_{ij} $ for all $ i,j \in \{ 0,1,\dots,d \} $.
+    \end{enumerate}
+    \label{th:idemp_mat_properties}
+\end{theorem}
+\begin{proof}
+    We start by proving the first statement. If $ A \in \mathbb{C}(\mathcal{A}) $,
+    then $ A^* \in \mathbb{C}(\mathcal{A}) $ because the matrices
+    $ A_0, A_1, \dots, A_d $ have coefficients in $ \{ 0,1 \} $ and
+    $ A_i \in \mathcal{A} $ for all $ i \in \{ 0,1,\dots,d \} $. Then we
+    can use \ref{lm:ekr_N2} to prove that $ \mathbb{C}(\mathcal{A}) $ satisfies
+    the conditions of \ref{th:ekr_commutative}. Therefore, for every matrix
+    in $ \mathbb{C}(\mathcal{A}) $ there is a set $ \{ E_1^A, \dots, E_k^A \} $
+    idempotent, paiwise orthogonal matrices such that $ A $ is a linear combination
+    of them. Consider the set
+    \[ S = \cup_{A \in \mathbb{C}(\mathcal{A})} \{ E_1^A, \dots, E_k^A \} \]
+    Note that $ E_i^A $ and $ E_j^B $ are not necessarily orthogonal if
+    $ A \neq B $. Consider the subset of minimal idempotent matrices in $ S $,
+    $ S' $, which exists due to \ref{lm:ekr_minimal}. All elements in $ S' $
+    are then pairwise orthogonal. To prove the statement we just have to show
+    that $ S' $ spans $ \mathbb{C}(\mathcal{A}) $. Fix any $ F \in S $, and
+    define $ F_0 $ as the sum of all $ E \in S' $ such that $ E \leq F $.
+    Note that $ F_0 $ is idempotent because all matrices in $ S' $ are pairwise
+    othogonal. Moreover, $ F_0 \leq F $, since
+    \[ FF_0 = F(\sum_{E \in S' \mid FE = E} E) =
+        \sum_{E \in S' \mid FE = E } FE =
+    \sum_{E \in S' \mid FE = E } = E = F_0 \]
+
+    Now suppose $ F_0 \neq F $. Then, it holds that
+    \[ (F-F_0)^2 = F^2 - 2FF_0 + F_0^2 = F -2F_0 + F_0 = F - F_0  \]
+    so $ F - F_0 $ is an idempotent matrix. Notice that
+    \[ F(F-F_0) = F^2 -F_0 = F-F_0 \]
+    so $ (F-F_0) \leq F $. This implies the existence of a non-zero
+    minimal idempotent matrix $ G $ such that $ G \leq F-F_0 \leq F $, but
+    this contradicts the definition of $ F_0 $. So $ F = F_0 $, and we have
+    proved that $ \mathbb{C}(\mathcal{A}) $ is spanned by $ S' $. Note that
+    the matrices in $ S $ must be linearly independent due to being orthogonal,
+    so $ S' = \{ E_1, \dots, E_k \} $ is, in fact, a basis for
+    $ \mathbb{C}(\mathcal{A}) $.
+
+    We now prove the properties of these matrices $ \{ E_1, \dots E_k \} $:
+    \begin{enumerate}[label=(\roman*)]
+        \item Note that $ J = A_0 + A_1 + \dots + A_d \in \mathbb{C}(\mathcal{A})  $.
+            Define $ E_0 := f_1(J)m_{J,1}(J) \in S $ following the notation in
+            \ref{th:ekr_commutative}. We know that it is idempotent, so we
+            just have to show that it has rank 1, i.e., its column space has
+            dimension 1. Suppose that
+            $ p(x) := p_0 + p_1 x + p_2 x^2 + \dots + p_m x^m $.
+            Note that $ J^i $ has rank $ 1 $ for all $ i \in \mathbb{N} $,
+            so $ p(J) $ is a matrix of rank $ 1 $ plus the matrix $ p_0 I $.
+            It is clear then that the dimension of the column space over
+            $ \mathbb{C} $ of $ p(J) $ is $ 1 $. From this we get that $ E_0 $
+            is the product of two rank one matrices, so it has rank at most
+            one.
+        \item We know that $ I \in \mathbb{C}(\mathcal{A}) $, so there exist
+            $ a_0, a_1, \dots, a_d \in \mathbb{C} $ such that
+            \[ I = \sum_{ i=0 }^{ d } a_iE_i \]
+            We just have to show that $ a_i = 0,\forall i \in \{ 0,1,\dots,d \} $.
+            Note that, for any $ i $, it holds that
+            \[ E_i = I E_i = (\sum_{ i=0 }^{ d } a_iE_i) E_i = a_i E_i^2
+            = a_i E_i \]
+            so $ a_i = 1 $.
+        \item For a given $ i \in \{ 0,1, \dots, d \} $,
+            $ E_i = f_i(A)m_{A,i}(A) $ for some
+            $ A \in \mathbb{C}(\mathcal{A}) $. Then,
+            \[ E_i^T = f_i(A)^T m_{A,i}(A)^T = f_i(A^T) m_{A,i}(A^T) \]
+            Clearly $ A^T = (\sum_{ i=0 }^{ d } \alpha_i A_i )^T =
+            \sum_{ i=0 }^{ d } \alpha_i A_i^T \in \mathbb{C}(\mathcal{A}) $,
+            since for any $ i \in {0,1,\dots,d} $, $ A_i^T \in \mathcal{A} $.
+            Therefore, $ E_i^T \in S $. Suppose $ E_i^T $ is not minimal.
+            Then, there exists an $ F \in S $, $ F \neq E_i^T $, such that
+            $ F \leq E_i^T \iff E_i^TF = F $. Since $ \mathbb{C}(\mathcal{A}) $
+            is a commutative algebra, it then holds that
+            \[ (E_i^TF)^T = F^T \iff F^T E_i = F^T \iff E_i F^T = F^T \]
+            that is, $ F^T \leq E_i $, which contradicts the fact that $ E_i $
+            is minimal. We conclude that $ E_i^T $ mut be minimal.
+        \item It is immediate from the fact that $ \mathbb{C}(\mathcal{A}) $
+            is closed under the $ Schur $ multiplication.
+        \item It is immediate from the fact that any $ E_i, E_j \in S' $ are
+            pairwise othogonal and idempotent.
+    \end{enumerate}
+\end{proof}
+
+\begin{lemma}
+    The idempotent matrices $ \{ E_0, E_1, \dots, E_d \} $ that form a basis
+    of $ \mathbb{C}(\mathcal{A}) $ are also Hermitian.
+\end{lemma}
+\begin{proof}
+    We have already shown that $ \mathbb{C}(\mathcal{A}) $ is closed under
+    conjugation. Therefore, for any $ i \in \{ 0,1,\dots,d \} $, it holds that
+    there exist $ a_{i0}, a_{i1}, \dots, a_{id} \in \mathbb{C} $ such that
+    \[ E_i^* = \sum_{ i=0 }^{ d } a_{ij} E_j \]
+    Note that, for all $ j \in \{ 0,1,\dots,d \} $, it holds that
+    \[ E_i^* E_j = a_j E_j \]
+    Suppose that $ E_i^* $ is not minimal. Then there is an idempotent matrix
+    $ F \in \mathbb{C}(\mathcal{A}) $, $ F \neq E_i^* $, such that
+    $ F \leq E_i^* \iff E_i^*F = F $. Since $ \mathbb{C}(\mathcal{A}) $ is
+    commutative, this implies that
+    \[ (E_i^* F)^* = F^* \iff F^* E_i = F^*  \iff E_i F^* = F^* \]
+    which contradicts the fact that $ E_i $ is minimal. Therefore, $ E_i^* $ is
+    minimal, and so for any $ i \in \{ 0,1,\dots,d \} $ there is a
+    $ j \equiv j(i) \in \{ 0,1,\dots,d \} $ such that $ E_i^* E_j(i) \neq 0 $.
+
+    We only have to prove that this $ j(i) $ is $ i $ itself. We know that, for
+    all $ k \in \{ 0,1,\dots,d \} \setminus {j(i)} $,
+    \[ E_i^* E_k = 0 \iff a_k = 0 \]
+    But, since $ tr(E_i^* E_i) > 0 $, it must also hold that
+    \[ E_i^* E_i \neq 0 \iff a_i \neq 0 \]
+    so we conclude that $ j(i) = i $ and $ E_i^* = a_i E_i $. Using the fact that
+    $ tr(E_i) = tr(E_i^*) $, we conclude that $ a_i = 1 $ and $ E_i^* = E_i $.
+\end{proof}
+
+We can use the basis of idempotents, $ \{ E_0, E_1, \dots, E_d \} $, to state
+some key identities which are fundamental to the study of association schemes.
+
+\begin{definition}
+    Let $ \mathcal{A} = \{ A_0, A_1, \dots, A_d \} $ be an association scheme.
+    For any given $ i $ in $ \{ 0,1,\dots,d \} $, we define the $ p_i(j) $ as
+    the $ j $-th coordinate of $ A_i $ in the basis $ \{ E_0, E_1, \dots, E_d \} $,
+    that is,
+    \[ A_i = \sum_{ j=0 }^{ d } p_i(j)E_j \]
+    The values $ p_i(j) $ are called the \textbf{eigenvalues} of $ \mathcal{A} $.
+\end{definition}
+
+The chosen name for the $ p_i(j) $ is not coincidental. Since the $ E_i $ are
+idempotent and pairwise orthogonal, we have that
+\[ A_iE_j = p_i(j)E_j \]
+from which it is immediate that the columns of $ E_j $ are eigenvectors of
+$ A_i $, with eigenvalue $ p_i(j) $. Note that $ p_i(0) $ is the valency of the
+of the graph $ X_i $, that is, the number of edges that are associated to each
+vertex:
+\begin{proof}
+    Note that
+    \[ A_i E_0 = p_i(0) E_0 \iff A_i J = p_i(0) J \]
+    By looking at the LHS it is clear that the $ x $-th row of the resulting
+    matrix is precisely the valency of $ x $ in $ X_i $. Then, the RHS tells us that this
+    valency is constant for all $ x \in X $ with value $ p_i(0) $.
+\end{proof}
+\begin{remark}
+    Note that, since we are working with commutative, symmetric association
+    schemes, the $ A_i $ matrices are symmetric matrices over $ \mathbb{R} $,
+    and so their eigenvalues are also in $ \mathbb{R} $.
+\end{remark}
+The valency is usally referred to as $ v_i := p_i(0) $.
+
+We can make analog constructions using $ \{ A_0, A_1, \dots, A_d \} $ as the
+basis for $ \mathbb{C}(\mathcal{A}) $:
+
+\begin{definition}
+    Let $ \mathcal{A} = \{ A_0, A_1, \dots, A_d \} $ be an association scheme.
+    For any given $ j \in \{ 0,1,\dots,d \} $, we define the $ q_j(i) $ as $ n $
+    times the $ i $-th coordinate of $ E_j $ in the basis
+    $ \{ A_0, A_1, \dots, A_d \} $, that is,
+    \[ E_j = \frac{1}{n} \sum_{ i=0 }^{ d } q_j(i)A_i \]
+    The scalars $ q_j(i) $ are called the dual eigenvalues of $ \mathcal{A} $.
+\end{definition}
+
+\begin{lemma}
+    Let $ \mathcal{A} = \{ A_0,\dots,A_d \} $ be an association scheme. Then,
+    for any $ j \in \{ 0,1,\dots,d \} $, it holds that
+    \[ q_j(0) = \text{tr}(E_j) = \text{rk}(E_j) \]
+\end{lemma}
+\begin{proof}
+    We start by noting that complex idempotent matrices can only have eigenvalues $ 0 $
+    or $ 1 $. Then, by changing to the eigenvector basis, it is easy to see that
+    the trace of an idempotent matrix is precisely its rank.
+
+    By the definition of $ q_j(i) $, it holds that
+    \[ \text{tr}(E_j) = \frac{1}{n}\sum_{ i=0 }^{ d }q_j(i)\text{tr}(A_i) \]
+    Since $ tr(A_i) = 0 $ if $ i\neq 0 $ and $ A_0 = I $, it is clear that the
+    right hand side is just $ q_j(0) $.
+\end{proof}
+
+The values $ q_j(0) $, for $ j \in \{ 0,1,\dots,d \} $, is often referred to as
+the \textbf{multiplicities} of the association scheme, denoted by $ m_j $.
+
+\begin{proposition}
+    \label{prop:association_schemes_pq_identity}
+    Let $ \mathcal{A} = \{ A_0, A_1, \dots, A_d \} $ be an association scheme,
+    let $ \{ E_0, E_1, \dots, E_d \} $ its orthogonal idempotent matrix basis.
+    Then, for any given $ i,j \in \{ 0,1,\dots,d \} $ it holds that
+    \[ \sum_{ k=0 }^{ d } p_k(i) q_j(k) =
+        \begin{cases}
+            0, i \neq j \\
+            n, i = j
+        \end{cases}
+    \]
+\end{proposition}
+\begin{proof}
+    Fix some $ i,j \in \{ 0,1,\dots,d \} $. Looking at the definitions of
+    $ q_j(i) $ and $ p_i(j) $, we get that
+    \[
+        E_j = \frac{1}{n} \sum_{ k=0 }^{ d } q_j(k) A_k \iff
+        E_j = \frac{1}{n} \sum_{ k=0 }^{ d } q_j(k) \sum_{ l=0 }^{ d } p_k(l) E_l
+    \]
+    from which
+    \[
+        E_j E_i = \frac{1}{n} \sum_{ k=0 }^{ d } q_j(k) \sum_{ l=0 }^{ d }
+            p_k(l) E_l E_i
+        \iff
+        n\delta_{ij} = \sum_{ k=0 }^{ d } q_j(k) p_k(i)
+    \]
+\end{proof}
+
+\begin{definition}
+    We define the \textbf{eigenmatrix} of the association scheme as the matrix
+    $ P $ whose coefficients are given by
+    \[ P_{i,j} = p_j(i) \]
+    We define the \textbf{dual eigenmatrix} of the association scheme as the
+    matrix $ Q $ whose coefficients are given by
+    \[ Q_{i,j} = q_j(i) \]
+\end{definition}
+
+Note that, from \ref{prop:association_schemes_pq_identity}, it is immediate that
+\begin{equation}
+    PQ = nI
+\end{equation}
+Similarly, it holds that
+\begin{equation}
+    QP = nI
+    \label{eq:QP_identity}
+\end{equation}
+
+Note for a fixed $ A_i $, the column space of each of
+the $ E_j $ defines an eigenspace of $ A_i $,
+with all of the column spaces beign pair-wise disjoint due to the $ E_j $ being
+orthogonal. What we have not seen yet is that the $ E_j $ define \textit{all}
+of the eigenspaces of $ A_i $. Since the sum of the dimensions of the complex
+eigenspaces of any complex $ n\times n $ matrix must be equal to $ n $, it is
+sufficient to show that the sum of all the multiplicities is equal to $ |X| $.
+
+\begin{proposition}
+    Let $ m_0, m_1, \dots, m_d $ be the multiplicities of an associtiation
+    scheme over the set $ X $. Then, it holds that
+    \[ \sum_{ k=0 }^{ d } m_k = |X| \]
+\end{proposition}
+\begin{proof}
+    From \eqref{eq:QP_identity} we get that
+    \[ |X| = (QP)_{00} = \sum_{ k=0 }^{ d } Q_{0k} P_{k0} =
+    \sum_{ k=0 }^{ d } q_k(0) p_0(k)   \]
+    Using the fact that $ p_0(k) = 1 $, we get that
+    \[ |X| = \sum_{ k=0 }^{ d } m_k \]
+\end{proof}
+
+Therefore, we may conclude the following:
+\begin{corollary}
+    For any given $ i \in \{ 0,1,\dots,d \} $, the column spaces of the matrices
+    $ \{ E_0, E_1, \dots, E_d \} $ are the eigenspaces of the matrix $ A_i $.
+\end{corollary}
+
+One can define an inner product in $ \mathbb{C}(\mathcal{A}) $. If $ M,N \in
+\mathbb{C}(\mathcal{A}) $, we define a bilinear form $ \langle M,N \rangle $ as
+\[ \langle M,N \rangle := tr(M^*N) \]
+This satisfies the properties necessary for it to be an inner product:
+\begin{proof}
+    \begin{itemize}
+        \item $ \langle N,M \rangle = tr(N^*M) = tr(MN^*) = \overline{tr(M^*N)} $.
+        \item $ \langle M,a N_1 + b N_2 \rangle = tr(M^*(aN_1 + bN_2)) =
+            tr(M^*(aN_1) + M^*(bN_2)) = atr(M^*N_1) + btr(M^*N_2) =
+            a\langle MN_1 \rangle b \langle MN_2 \rangle $.
+        \item $ \langle M,M \rangle = tr(M^*M) = \sum_{ i=0 }^{ n }
+            \overline{M_{ii}}M_{ii} = \sum_{ i=0 }^{ n } \mid M_{ii} \mid^2
+            > 0 $.
+    \end{itemize}
+\end{proof}
+
+We can define this inner product in an equivalent way that is sometimes more
+convenient. First, for a matrix $ A \in \mathbb{C}(\mathcal{A}) $, define $ sum(A) $
+as the sum of all the entries in $ A $. Then, we can rewrite
+\[ \langle M,N \rangle = sum(\overline{M}N) \]
+
+Note that both $ \{ E_0, E_1, \dots, E_d \} $ and $ \{ A_0, A_1, \dots, A_k \} $
+form an orthogonal basis with respect to this inner product.
+
+It is particularly interesting to consider the inner products between $ A_i $
+and $ E_j $ for all $ i,j \in \{ 0,1,\dots,d \} $. Following the first
+definition, we get that
+\[ \langle A_i,E_j \rangle = tr(A_i^TE_j) = \overline{tr(E_j^* A_i)} =
+\overline{tr(E_jA_i)} = \overline{tr(A_iE_j)} = tr(\overline{p_i(j)E_j}) =
+\overline{p_i(j)}m_j\]
+while with the second definition we get that
+\[ \langle A_i,E_j \rangle = sum(E_j \circ A_i) =
+\sum_{ k=0 }^{ d } \frac{1}{n} q_j(i) sum(A_k \circ A_i) = q_j(i)v_i \]
+
+Thus, we have that
+\[ \frac{\overline{p_i(j)}}{v_i} = \frac{q_j(i)}{m_j} \]
+
+We will use $ \Delta_v $ and $ \Delta_m $ to denote the diagonal matrix of
+valencies and multiplicities, respectively. Then, we can express the previous
+equality as
+\[ \Delta_m P = Q^* \Delta_v \]
+
+As we will see in the next section, the action of a group $ G $ on the set $ X $
+over which we have an association scheme can have a lot of interesting properties.
+For this reason, for any given $ g \in G $ we will define $ P_g $ as the
+permutation matrix of $ g $ over $ X $, that is, the matrix indexed by $ X $
+whose $ (x,y-x) $ element is
+\[
+    (P_g)_{xy} =
+    \begin{cases}
+        1 &\text{ if y = gx,} \\
+        0 &\text{ otherwise}
+    \end{cases}
+\]
+
+This allows us to define the following:
+\begin{definition}
+    The \textbf{centralizer algebra}, or \textbf{commutant}, of an association scheme
+    $ (X,\mathcal{R}) $ is the algebra of all complex matrices that commute with
+    $ P_g $ for all $ g \in G $. We denote it as $ \mathcal{C}(X) $.
+\end{definition}
+
+In \parencite[Lemma 3.2.1]{godsil_erdoskorado_2015}, a fundamental property of the
+centralizer algebra of association schemes is stated, but not proven. A proof is
+provided below.
+
+\begin{lemma}
+    The commutant of a set of $ n \times n $ permutation matrices is a Schur-closed
+    matrix algebra that contains $ I $ and $ J $ and is closed under transposition.
+\end{lemma}
+\begin{proof}
+    The matrix $ I $ is precisely the permutation matrix of the identity permutation,
+    and is clearly commutative.
+
+    For any $ g \in G $, the $ x $-th row of the matrix $ PJ $ is an array whose
+    every entry is the number of elements $ y \in X $ such that $ x = gy $. Note
+    that, for every such $ y $, there is a $ z := gy \in X $ such that
+    $ z = gx $, and that $ JP $ is a matrix whose $ x $-th column is an array
+    where all the entries are the number of elements $ z \in X $ such that
+    $ z = gx $. Therefore, it must hold that $ JP = PJ $.
+
+    Supose now that $ A,B $ are two matrices in the commutant, and consider any
+    $ \lambda \in \mathbb{C} $ and $ g \in G $. Then it holds that
+    \begin{equation*}
+        \begin{split}
+            & (A+B) P_g = AP_g + BP_g = P_gA + P_gB = P_g(A+B) \\
+            &(AB) P_g = A(BP_g) = (AP_g)B = P_g(AB) \\
+            &(\lambda A)P_g = \lambda(AP_g) = \lambda (P_gA) = P_g(\lambda A)
+        \end{split}
+    \end{equation*}
+    which proves that the commutant is a matrix algebra. Furthermore,
+    \[ A^TP_g = (P_g^TA)^T = (P_{g^{-1}}A)^T = (AP_{g^{-1}})^T = P_g A^T \]
+    so it is closed under transposition.
+
+    We only have left to check wether it is closed under the Schur multiplication.
+    Let $ P $ be any permutation matrix of the form
+    \[
+        P = \left (
+        \begin{array}{ccc}
+            \horzbar & e_{r_1}^T & \horzbar \\
+                     & \vdots & \\
+            \horzbar & e_{r_n}^T & \horzbar
+        \end{array}
+        \right ), \quad
+        P = \left (
+        \begin{array}{ccc}
+            \vline  &  & \vline \\
+            e_{c_1} & \cdots & e_{c_n} \\
+            \vline & & \vline
+        \end{array}
+        \right )
+    \]
+    for some permutations $ (c_1,\dots,c_n) $, $ (r_1,\dots,r_n) $ of
+    $ (1,\dots,n) $, and where $ e_i $ is the
+    $ i $-th canonical column vector. Then, $ A $ belongs to the commutant if
+    and only if, for all $ i,j $,
+    \[ (PA)_{ij} = (AP)_{ij} \iff a_{r_i,j} = a_{i,c_j}  \]
+    Therefore, for any $ A,B $ in the commutant, it holds that
+    \[ (A \circ B)_{r_i,j} = a_{r_i,j}b_{r_i,j} = a_{i,c_j}b_{i,c_j} =
+    (A \circ B)_{i,c_j} \]
+    and so $ A \circ B $ is also in the commutant, proving that the commutant
+    is closed under the Schur multiplication.
+\end{proof}
+
+Another concept that is often talked about in the literature, and that we will
+utilize at the end of this section, is the inner and outer distributions.
+\begin{definition}
+    Let $ (X,\mathcal{R}) $ be $ d $-class association scheme, and let $ Y $
+    be a nonempty subset of $ X $. We define the \textbf{inner distribution} of
+    $ Y $ as the row vector $ a = ( a_0, a_1, \dots,a_d ) $ where
+    \[ a_i = \frac{1}{|Y|}|(Y\times Y)\cap R_i| \]
+\end{definition}
+\begin{remark}
+    The inner distribution is sometimes found in the literature as
+    \[ a_i = \frac{1}{|Y|}\boldsymbol{x_Y}^T A_i \boldsymbol{x_Y} \]
+    where $ \boldsymbol{x_Y} $ is the characteristic vector of $ Y $, that is,
+    \[ \boldsymbol{x_Y}(t) = \begin{cases}
+        &1 \text{ if } t \in Y \\
+        &0 \text{ otherwise}
+    \end{cases} \]
+    One can easily check that this two definitions are equivalent.
+\end{remark}
+
+\begin{lemma}[{\parencite[Theorem 30.3]{van_lint_course_2001}}]
+    The distribution vector $ a $ of a nonempty subset $ Y $ of an association
+    scheme $ (X,\mathcal{R}) $ satisfies
+    \[ aQ \geq 0 \]
+    where $ 0 $ is the $ (d+1) $-dimensional zero row vector.
+\end{lemma}
+\begin{proof}
+    Since $ E_j $ is idempotent and symmetric, it holds that
+    \begin{equation*}
+        \begin{split}
+        0 \leq |\boldsymbol{x_Y}^TE_j|^2 = \boldsymbol{x_Y}^T E_j^T E_j \boldsymbol{x_Y} = \boldsymbol{x_Y}^T E_j \boldsymbol{x_Y}
+        =& \frac{1}{|X|}\boldsymbol{x_Y}^T(\sum_{ i=0 }^{ d }Q_{ij}A_i)\boldsymbol{x_Y} = \\
+        =& \frac{|Y|}{|X|}(\sum_{ i=0 }^{ d }Q_{ij}\boldsymbol{x_Y}^TA_i\boldsymbol{x_Y})
+        \end{split}
+    \end{equation*}
+\end{proof}
+
+The lemma above, when applied to the association scheme obtained over matrices,
+gives us an analog of the \textit{MacWilliams inequalities} established for
+classical codes.
+
+\begin{definition}
+    Let $ (X,\mathcal{R}) $ be $ d $-class association scheme, and let $ Y $
+    be a nonempty subset of $ X $. We define the outer distribution of $ Y $
+    as the $ |X|\times(d+1) $ matrix B where
+    \[ B_{xi} := |\{ y \in Y \mid (x,y) \in R_i \} | = (A_i\chi)_x \]
+\end{definition}
+
+\begin{lemma}[{\parencite[Lemma 2.5.1]{brouwer_distance-regular_1989}}]
+    The inner distribution $ a $ and outer distribution $ B $ of a nonempty
+    subset $ Y $ of an association scheme $ (X,\mathcal{R}) $ satisfy
+    \[ (BQ)_{xj} = n\chi^TE_j\chi, \quad (|Y|aQ)_j = |X|\chi_y^TE_j\chi \]
+    \label{lm:in_out_dist}
+\end{lemma}
+\begin{proof}
+    \begin{equation*}
+        (BQ)_{xj} = \sum_{ i } B_{xi}Q_{ij} = \sum_{ i } (A_i\chi)_xQ_{ij} =
+        |X|(E_j\chi)_x
+    \end{equation*}
+    \begin{equation*}
+        (|Y|aQ)_j = (\chi^TBQ)_j = |X|\chi^TE_j\chi
+    \end{equation*}
+\end{proof}
+
+\section{Translation association schemes}
+In this section we will over some properties which are specific to a certain type
+of association schemes called translation association schemes.
+
+\begin{definition}[{\parencite[Section 2.10]{brouwer_distance-regular_1989}}]
+    A \textbf{translation association scheme} is an association scheme
+    $ (X, \mathcal{R}) $ in which the underlying set $ X $ has the structure of
+    an abelian group and, for all classes $ R \in \mathcal{R} $, it holds that
+    \[ (x,y) \in R \iff (x+z,y+z) \in R, \forall z \in X \]
+\end{definition}
+
+It is clear that the association scheme obtained with the rank distance over the
+set of matrices with coefficients in $\mathbb{F}_{q}$ must also be a
+translation association scheme.
+
+\begin{comment}
+
+To give a complete proof, we will use the fact that finite group actions over
+finite abelian groups give constructions of translation association schemes:
+
+\begin{theorem}[{\parencite[Theorem 2]{kim_duality_2011}}]
+    \label{th:tas_construction}
+    Suppose $ G $ is a finite group acting on an abelian group $ X $ with
+    $ \mathcal{O}_0, \mathcal{O}_1, \dots, \mathcal{O}_d $ being the orbits of
+    this action. Suppose that this action has the following properties:
+    \begin{enumerate}[label=(\alph*)]
+        \item \label{th:tas_construction:item:O0} $
+            \mathcal{O}_0 = \{ 0 \} $;
+        \item \label{th:tas_construction:item:distributive}
+            $ g(x + x') = gx + gx' $, $ \forall g \in G $ $ \forall x,x' \in X $;
+        \item \label{th:tas_construction:item:minus}
+            $ x \in \mathcal{O}_i \Rightarrow -x \in \mathcal{O}_i, \forall
+            i \in \{ 0,1,\dots,d \} $.
+    \end{enumerate}
+    Then, $\mathfrak{X}_G = (X, \mathcal{R} = \{ R_0, R_1, \dots, R_d \} $, where
+    the relation is given by
+    \[ (x,y) \in R_i \iff y-x \in \mathcal{O}_i \]
+    is a symmetric translation scheme.
+\end{theorem}
+\begin{proof}
+    We will start by proving that all axioms in
+    \ref{def:sym_association_scheme_partition}:
+    \begin{enumerate}[label=(\roman*)]
+        \item $ (x,y) \in X \times X \Rightarrow y-x \in \mathcal{O}_i $ for a
+            unique $ i \in \{ 0,1,\dots,d \} $ because the orbits of the action
+            of $ G $ over $ X $ partition $ X $. Therefore, every $ (x,y) \in
+            X \times X $ lies in $ R_i $ for a unique $ i \in \{ 0,1,\dots,d \} $,
+            and so $ \mathcal{R} $ partitions $ X \times X $.
+        \item $ \forall x \in X, x-x = 0 \in \mathcal{O}_0 \Rightarrow (x,x) \in R_0$.
+        \item Given a fixed $ i \in \{ 0,1,\dots,d \} $, due to
+            \ref{th:tas_construction:item:minus} it holds that
+            \[ (x,y) \in R_i \iff y-x \in \mathcal{O}_i \iff
+            x-y \in \mathcal{O}_i \iff (y,x) \in \mathcal{0}_i \]
+        \item Fix $ i,j,k \in \{ 0,1,\dots,d \} $. We want to prove that, for
+            any $ x,y,x',y' \in X $ such that $ u := y-x \in \mathcal{O}_k $ and
+            $ v := y'-x' \in \mathcal{O}_k $, it holds that:
+            \[ \mid T_{k,i,j}(x,y) :=
+                \{ z \in X \mid z-x \in \mathcal{O}_i, y-z \in \mathcal{O}_j \}
+                \mid = \mid
+                T_{k,i,j}(x',y') :=
+                \{ z \in X \mid z-x' \in \mathcal{O}_i, y'-z \in \mathcal{O}_j \}
+                \mid
+            \]
+            We start by constructing a bijection
+            \begin{equation*}
+            \begin{split}
+                \Phi_{x,y}: \{ z \in X \mid z-x \in \mathcal{O}_i, y-z \in \mathcal{O}_j \}
+                \rightarrow &
+                \{ t \in X \mid u-t \in \mathcal{O}_i, t \in \mathcal{O}_j \} \\
+                z \rightarrow & \Phi_{x,y}(z) := y - z
+            \end{split}
+            \end{equation*}
+            The codomain is well defined, since for any $ z $ in the LHS,
+            $ \Phi_{x,y}(z) $ is such that $ u - \Phi_{x,y}(z) = (y-x) - (y-z) = z-x \in
+            \mathcal{O}_i $ and $ \Phi_{x,y}(z) = y-z \in \mathcal{O}_j $.
+
+            Suppose $ z_1 \neq z_2 $, then $ \Phi_{x,y}(z_1) - \Phi_{x,y}(z_2) =
+            (y-z_1) - (y-z_2) = z_2 - z_1 \neq 0 $. Therefore, $ \Phi_{x,y} $ is
+            injective.
+
+            Suppose $ t \in X $ is such that $ u-i \in \mathcal{O}_i $ and
+            $ t \in \mathcal{O}_j $. Then we can define a $ z := y-t \in X $
+            such that $ \Phi_{x,y}(z) = y - (y-t) = t $ and $ z-x = y-t-x = (y-x) - t
+            = u - t \in \mathcal{O}_i $, $ y-z = y-(y-t) = t \in \mathcal{O}_j $.
+            Therefore, $ \Phi_{x,y} $ is exhaustive.
+
+            $ \Phi_{x,y} $ is a bijection, and so is the analog map for the points
+            $ x',y' $, $ \Phi_{x',y'} $.
+
+            Note that $ G $ acts transitively on each of its orbits. Therefore,
+            there exists an $ h
+            \in G $ such that $ v = hu $. We will use this to construct another
+            two bijections
+            \begin{equation*}
+            \begin{split}
+                \Psi: \{ z \in X \mid u-z \in \mathcal{O}_i, z \in \mathcal{O}_j \}
+                \rightarrow
+                &\{ t \in X \mid v-t \in \mathcal{O}_i, t \in \mathcal{O}_j \} \\
+                z \rightarrow &\Psi(z) := hz
+            \end{split}
+            \end{equation*}
+
+            The codomain is well defined, since due to
+            \ref{th:tas_construction:item:distributive}
+            for any $ z $ in the LHS it holds that
+            $ v - \Psi(z) = hu - hz = h(u-z) \in \mathcal{O}_i \iff u-z \in
+            \mathcal{O}_i$ and
+            $ hz \in \mathcal{O}_j \iff z \in \mathcal{O}_j $.
+
+            Suppose that $ z_1 \neq z_2 $. Note that $ hz = 0 \Rightarrow
+            h^{-1}(hz) = 0 \iff (h^{-1}h)(z) = h^{-1}(0) \iff z = 0 $. Then,
+            $ \Psi(z_1) - \Psi(z_2) = hz_1 - hz_2 = h(z_1-z_2) \neq 0 $, and
+            $ \Psi $ is injective.
+
+            Suppose $ t \in X $ is such that $ v - t \in \mathcal{O}_i $ and
+            $ t \in \mathcal{O}_j $. Then we can define $ z := h^{-1}t $, such
+            that $ \Psi(z) = h(h^{-1})(t) = (hh^{-1})(t) = t $ and
+            $ u-z = h^{-1}v - h^{-1}t = h^{-1}(v-t) \in \mathcal{O}_i \iff
+            \mathcal{O}_i $ and $ z = h^{-1}t \in \mathcal{O}_j \iff
+            t \in \mathcal{O}_j $.
+
+            Therefore, we have shown that we can go from $ T_{k,i,j}(x,y) $ to
+            $ T_{k,i,j}(x',y') $ with the bijection
+            \[ \Phi_{x',y'}^{-1} \circ \Psi \circ \Phi_{x,y} \]
+            and it is clear that both sets have the same cardinality.
+    \end{enumerate}
+\end{proof}
+
+Since matrices form an abelian group under matrix addition, we just have to find
+a group acting on the matrices such that its orbits are precisely
+\[ \mathcal{O}_i := \{ A \in M_n(\mathbb{F}) \mid rank(A) = i \} \]
+and it satisfies the hypothesis of $ \ref{th:tas_construction} $.
+
+We will consider $ G = GL(n,q) $, that is, the set of non-singular $ n \times
+n $ matrices over $ M_n(\mathbb{F}_{q}) $. First we check that $ G $ satisfies the
+previous hypothesis:
+\begin{enumerate}[label=(\alph*)]
+    \item For any $ S \in GL(n,q) $, it is clear that $ S0 = 0 $.
+    \item For any $ S \in GL(n,q) $ and any matrices $ A,B $, it holds
+        that:
+        \[ S(A+B) = SA + SB \]
+    \item For any matrix $ A $, it is immediate that $ rank(A) = rank(-A) $.
+\end{enumerate}
+Now we will show that the orbits of the action of $ G $ over an additive group
+of matrices in $ M_n(\mathbb{F}_{q}) $ do in fact partition the matrices
+according to their rank. Suppose two matrices $ A,B $ have rank $ r $. Then,
+there are $ r $ columns in both $ A $ and $ B $ that are linearly independent.
+Let $ (i_1, \dots, i_r) $ and $ (j_1, \dots, j_r) $ be the indexes of these
+columns of A and B, respectively. There is a basis change matrix, $ M_A $, such
+that $ a_{i_k} = M_A e_{i_k} $, where $ a_{i_k} $ is the corresponding column of
+$ A $ and $ e_{i_k} $ is the corresponding cannonical basis vector. There is an
+analog matrix $ M_B $ such that $ e_{j_k} = M_B b_{j_k} $. Let $ P $ be the
+permutation matrix that brings the columns in $ (j_1, \dots, j_r) $ to the
+columns in $ (i_1, \dots, i_r ) $. Then, we have that
+\[ A = (M_A^{-1} P M_B) B \]
+where $ S := M_A^{-1} P M_B \in GL(n,q) $.
+
+\end{comment}
+
+Working with a translation association scheme is useful because we can use the
+structure of the abelian group $ X $ to give another meaning to some of the
+identities that hold for general association schemes. For this, an inner product
+on $ X $
+\footnote{This must not be confused with the inner product defined previously
+over the matrices in $ \mathbb{C}(\mathcal{A}) $. Even when $ X $ is a set of
+squared matrices, the two are not related.}.
+is necessary. Note that, since $ X $ is an abelian finite group, the existence
+of an inner product is guaranteed: the fundamental theorem of finite abelian
+groups states that $ X $ is a direct sum of cyclic subgroups of prime-power order,
+that is,
+\[
+    X = ( \mathbb{Z} / e_1\mathbb{Z} ) \oplus ( \mathbb{Z} / e_2\mathbb{Z} )
+    \oplus \dots \oplus ( \mathbb{Z} / e_m\mathbb{Z} )
+\]
+and if we denote the lowest common multiple of $ e_1, \dots, e_m $ by $ e $, then we
+can define the inner product of $ X $ as
+\[ \langle x,y \rangle = \sum_{ i=1 }^{ m } \frac{e}{e_i} x_i y_i \]
+where $ x, y \in X $, $ x = (x_1,\dots,x_m), y = (y_1, \dots, y_m) $. Sometimes
+it might be useful to use a different inner product, if it exists.
+
+We will now reintroduce the concept of the centralizer algebra. When dealing with
+translation association schemes, the set $ X $ is now isomorphic to its group
+of permutations. Therefore, the permutation matrices can be expressed as $ P_x $,
+where $ x \in X $, and for every $ a,b \in X $
+\[ (P_x)_{ab} =
+    \begin{cases}
+        & 1 \text{ if b = a + x} \\
+        & 0 \text{ otherwise}
+    \end{cases}
+\]
+
+It is easy to check that the properties hold for the permutation matrices of
+a finite abelian set:
+\begin{equation*}
+      P_x P_y = P_{x+y},\;
+      P_x P_y = P_y P_x,\;
+      (P_x)^s = P_{sx},\;
+      P_x \circ P_y = \delta_{xy}P_x,\;
+      P_x^T = P_{-x}
+\end{equation*}
+
+\begin{definition}
+    The \textbf{restricted centralizer algebra} of a translation association scheme
+    $ (X,\mathcal{R}) $, $ \mathcal{C}_r(X) $, is the real subalgebra of real,
+    symmetric matrices in $ \mathcal{C}(X) $.
+    It is spanned by $ P_x + P_{-x} $, for all $ x \in X $.
+\end{definition}
+
+This can analogously be defined for regular association schemes.
+
+\begin{lemma}
+    Every adjacency matrix $ A_i $ of a translation association scheme on $ X $
+    can be expressed as
+    \[ A_i = \sum_{ x\in N_i } P_x  \]
+    where
+    \begin{equation}
+        N_i = \{ x \in X \mid (0,x) \in R_i \}
+    \end{equation}
+    \label{lm:Ai_as_sum_of_perm}
+\end{lemma}
+\begin{proof}
+    In a translation associan scheme, for any $ a,b \in X $, it holds that
+    \[ (a,b) \in N_i \iff b-a \in N_i \]
+    Note that, for every $ z \in N_i $,
+    \[ (P_z)_{ab}
+        \begin{cases}
+            & 1 \text{ if } b-a = z \\
+            & 0 \text{ otherwise}
+        \end{cases}
+    \]
+Also, we observe that $ P_x \circ P_y = \delta_{xy} P_x $, that is, for two
+different permutation matrices, there are no entries which are one in both.
+Therefore,
+    \[
+        (\sum_{ x \in N_i } P_x)_{ab} =
+        \begin{cases}
+            & 1 \text{ if } b-a = x \text{ for some } x \in N_i \\
+            & 0 \text{ otherwise }
+        \end{cases}
+    \]
+which proves our statement.
+\end{proof}
+
+From this, the following is immediately clear:
+\begin{lemma}
+    The Bose-Mesner algebra of a translation
+    association scheme, $ \mathbb{C}(\mathcal{A}) $, is a subalgebra of
+    $ \mathcal{C}_r(X) $.
+    \label{lm:bm_subalg}
+\end{lemma}
+
+\begin{definition}
+    We define the \textbf{character group} $ X^* $ of a finite abelian group
+    $ X $ as the group of all functions $ \chi : X \rightarrow S^1 $ such that
+    \[ \chi(x+y) = \chi(x) \chi(y), \; \forall x,y \in X \]
+    where the group operation is defined as
+    \[ \chi_1\chi_2(x) = \chi_1(x)\chi_2(x) \]
+\end{definition}
+\begin{remark}
+    Characters are often defined as functions from $ X $ to $ \mathbb{C}^* $,
+    but note that for every $ x \in X $ there is an $ m_x \in \mathbb{N} $ such
+    that $ m_xx = 0 $, and therefore
+    \[
+        1 = \chi(0) = \chi(m_xx) = \chi(x)^{m_x} \implies
+        |\chi(x)| = 1
+    \]
+    for all $ \chi \in X^* $.
+\end{remark}
+
+For each character in $ \chi $, we can construct an $ |X| $-dimensional
+vector indexed by $ x \in X $ whose $ x $-th coordinate is $ \chi(x) $,
+that is,
+\begin{equation}
+    \chi_x = \chi(x)
+\end{equation}
+
+\begin{proposition}[Proposition 2.10.7, \cite{brouwer_distance-regular_1989}]
+    The character group $ X^* $ of a finite abelian group $ X $ is isomorphic
+    to $ X $. Moreover, there exists an isomorphism $ f : X \rightarrow X^* $
+    such that $ f(x)(y) = f(y)(x) $ for all $ x,y \in X $.
+    \label{prop:char_isomorph}
+\end{proposition}
+\begin{proof}
+    Note that $ X $ can be expressed a direct product of cyclic groups due to
+    it being finite and abelian: $ X = X_1 \times \dots \times X_r $. Let
+    $ \{ x_1, \dots, x_r \} $ be a basis of $ X $, and let $ m_i $ be the order
+    of $ x_i $, for $ i \in \{ 0,\dots,r\} $. Then, we may define a set of
+    characters, $ \{ \xi_1, \dots, \xi_r \} $, such that $ \xi_i(x_j) = 1 $ for
+    all $ j \neq i $ and $ \xi_i (x_j) = e^{\frac{2\pi i}{m_i}} $. We will show
+    that this set acts as a basis of $ X^* $. Let $ \chi \in X^* $. For
+    any $ x \in X $, there are $ \lambda_1, \dots, \lambda_r \in \mathbb{Z} $
+    such that $ x = \lambda_1 x_1 + \dots + \lambda_r x_r $, and so
+    \[ \chi(x) = \chi(\lambda_1 x_1 + \dots +\lambda_rx_r) =
+    \chi(x_1)^{\lambda_1} \cdots  \chi(x_r)^{\lambda_r} \]
+    Note that, for each $ i \in \{ 1,\dots,r \} $ it must hold that
+    \[ \chi(x_i)^{m_i} = \chi(m_ix_i) = \chi(0) = 1 \]
+    Therefore, for each $ i \in \{ 1,\dots,r \} $ there is an integer $ k_i $
+    such that $ \chi(x_i) = e^{\frac{2\pi i k_i}{m_i}} = \xi_i(x_i)^{k_i} $,
+    and so
+    \[ \chi = \xi_1^{\lambda_1 k_1} \cdots \xi_r^{\lambda_r k_r} \]
+    proving that $ \{ \xi_1, \dots, \xi_r \} $ is a basis of $ X^* $.
+
+    Let us now construct the isomophism $ f $ by mapping one basis to the other,
+    that is,
+    \[ f(x_i) = \xi_i \]
+    Then, for any $ x,y \in X $, $ x = \lambda_1 x_1 + \dots + \lambda_r x_r $
+    and $ y = \nu_1 y_1 + \dots + \nu_r y_r $
+    \begin{equation*}
+        \begin{split}
+        f(x)(y) =
+        (\xi_1^{\lambda_1} \cdots \xi_r^{\lambda_r}) (\xi_1\nu_1 + \dots + \xi_r\nu_r)
+        &= \xi_1^{\lambda_1} (\nu_1x_1 + \dots + \nu_rx_r) \cdots
+        \xi_r^{\lambda_r} (\nu_1x_1 + \dots + \nu_rx_r) = \\
+        &= (\xi_1^{\lambda_1})^{\nu_1} \cdots (\xi_r^{\lambda_r})^{\nu_r}
+        = (\xi_1^{\nu_1})^{\lambda_1} \cdots (\xi_r^{\nu_r})^{\lambda_r} = \\
+        &= \xi_1^{\nu_1} (\lambda_1x_1 + \dots + \lambda_rx_r) \cdots
+        \xi_r^{\nu_r} (\lambda_1x_1 + \dots + \lambda_rx_r) = \\
+        &= f(y)(x)
+        \end{split}
+    \end{equation*}
+\end{proof}
+
+Note that each $ x \in X $ defines a character $ x^{**} $ on $ X^* $ by
+$ x^{**}(\chi) = \chi(x) $. Furthermore, by \ref{prop:char_isomorph}, we have
+that $ |X| = |X^*| = |X^{**}| $. Therefore, we can think of $ X^{**} $ as being
+\textit{cannonically isomorphic} to $ X $, and we will use the two terms
+interchangeably.
+
+Given an inner product $ \langle \cdot,\cdot \rangle $ over $ X\times X $ and a character
+$ \chi $ on $ X $, we define a \textbf{multiplicative inner product} over
+$ X \times X $ as
+\[ A\cdot B = \chi \langle A,B \rangle  \]
+where it is clear that
+\[
+    A \cdot B = B \cdot A; \quad A \cdot B = 1 \iff A = 0 \text{ or } B = 0;
+    \quad A \cdot (B_1 + B_2) = (A \cdot B_1)(A \cdot B_2)
+\]
+The character group is sometimes given a diferent definition in the literature.
+In \cite{kim_duality_2011}, given any multiplicative inner product $ \cdot $,
+the $ X^* $ is defined as the set of $ \chi:X \rightarrow S^1 $ such that
+\[ \chi(y) = y \cdot x \]
+for some $ x \in X $.
+Note that every such $ \chi $ is clearly a character under our previous definition.
+From \ref{prop:char_isomorph}, we deduce that this set is not only well defined
+(that is, it does not depend on the choice of the multiplicative inner product),
+but it also must be exactly the same as the previouly defined $ X^* $, since one
+is included in the other and they have the same cardinality, $ |X| $.
+
+
+\begin{proposition}[Proposition 2.10.8, \cite{brouwer_distance-regular_1989}]
+    Let $ Y $ be a subgroup of $ |X| $. Then, for each $ \chi \in X^* $,
+    we have that
+    \begin{equation*}
+        \sum_{ y \in Y } \chi (y) =
+        \begin{cases}
+            &| Y | \text{ if } \chi(y) = 1 \text{ for all } y \in Y, \\
+            &0 \text{ otherwise}
+        \end{cases}
+    \end{equation*}
+    \label{prop:sum_char_tas}
+\end{proposition}
+\begin{proof}
+    Suppose there is a $ y_0 \in Y $ such that $ \chi(y_0) \neq 1 $. Then
+    \[ \chi(y_0) \sum_{ y\in Y } \chi (y) =
+        \sum_{ y\in Y } \chi (y+y_0) =
+        \sum_{ y\in Y } \chi (y)
+    \]
+    which implies that $ \sum_{ y\in Y } \chi (y) = 0 $.
+\end{proof}
+
+This proposition allows us to see further into the relationship between the
+translation association scheme over $ X $ and $ X^* $.
+
+\begin{proposition}
+    Let $ (X, \mathcal{R}) $ be a $ d $-class translation association scheme. For
+    every association matrix $ A_j $, each character $ \chi \in X^* $ is
+    an eigenvector of $ A_j $, with eigenvalue
+    $ \sum_{ x \in N_j } \chi(x) $. Furthermore, iterating over all
+    $ \chi \in X^* $ we get all the eigenvalues of $ A_j $.
+    \label{prop:character_eigen}
+\end{proposition}
+\begin{proof}
+    Fix any $ \chi \in X^*  $. Since $ X $ is a translation is an association
+    scheme, we have that $ (x,y) \in R_j \iff y-x \in N_j $. Also, we have that
+    \[ \chi(y) = \chi(y-x+x) = \chi(y-x)\chi(x) \]
+    We now look at the value of the $ x $-th element of the vector $ A_j \chi $:
+    \[
+        (A_j\chi)_x = \sum_{ (x,y) \in R_j } \chi(y) = \sum_{ z \in N_j }
+        \chi(z)\chi(x) = \left ( \sum_{ z \in X_j } \chi(z) \right ) \chi(x)
+    \]
+    It is therefore clear that for any $ j $, any $ \chi \in X^* $ is an
+    eigenvector of $ A_j $, with the desired eigenvalue.
+
+    Note that, any distinct $ \chi_1, \dots, \chi_k $ in $ X^* $ are linearly
+    independent when taken as vectors indexed by $ X $. This can be proved by
+    induction. Therefore, iterating over $ \chi \in X^* $ must give all the
+    eigenvalues of $ A_j $.
+\end{proof}
+
+\begin{definition}
+    The \textbf{dual scheme} $ (X^*, \mathcal{R}^*) $ of a translation association
+    scheme $ (X,\mathcal{R}) $
+    is the character group $ X^* $ of $ X $ with
+    $ \mathcal{R}^* = \{ R_0^*, R_1^*, \dots, R_d^* \} $, where
+    \[ R_i^* = \{ (\chi, \psi) \in X^*\times X^* \mid
+    E_i (\chi^{-1}\psi) = \chi^{-1}\psi \} \]
+    We will write $ N_i^* = \{ \eta \in X^* \mid (0,\eta) \in X\times X \} $.
+\end{definition}
+
+\begin{remark}
+    For any given $ i,j \in \{ 0,1,\dots,d \} $, for all
+    $ \eta \in N_i^* $ it holds that
+    \begin{equation}
+        P_{ij} = \sum_{ x \in N_j } \eta(x)
+        \label{eq:pval_char_sum}
+    \end{equation}
+\end{remark}
+\begin{proof}
+    Directly from \ref{prop:character_eigen}.
+\end{proof}
+
+One of the most important properties of translation association schemes, as we
+will see in this section, it that their corresponding dual schemes are also
+translation association schemes.
+
+\begin{definition}
+    We define the \textbf{Fourier transform}
+    $ \tau : \mathcal{C}(X) \rightarrow \mathcal{C}(X^*) $
+    as the semilinear map defined by
+    \begin{equation*}
+        \begin{split}
+            (P_x)^{\tau} &:= \sum_{ \chi\in X^* } \chi(x)P_{\chi} \\
+            (\sum_{ x \in X }\alpha_xP_x)^{\tau} &:= \sum_{x \in X}
+                \overline{\alpha}_x(P_{x})^{\tau}
+        \end{split}
+    \end{equation*}
+\end{definition}
+
+Note that, as we saw in \ref{lm:bm_subalg}, $ \mathbb{C}(\mathcal{A}) $ is a subset
+of $ \mathcal{C}(x)$, so we may apply $ \tau $ to matrices in
+$ \mathbb{C}(\mathcal{A}) $.
+
+\begin{proposition}
+    For all $ A,B \in \mathcal{C}(X) $ and all $ \alpha \in \mathbb{C} $, it holds
+    that
+    \begin{enumerate}[label=(\roman*)]
+        \item $ (A + B)^{\tau} = A^{\tau} + B^{\tau} $,
+            $ (\alpha A)^{\tau} = \overline{\alpha}A^{\tau} $,
+        \item $ (AB)^{\tau} = A^{\tau} \circ B^{\tau} $,
+            $ (A \circ B)^{\tau} = |X|^{-1} A^{\tau} B^{\tau} $,
+        \item $ A^{\tau\tau} = |X|A $,
+        \item $ I^{\tau} = J $, $ J^{\tau} = |X|I $.
+    \end{enumerate}
+    \label{prop:gamma_properties}
+\end{proposition}
+\begin{proof}
+    The first property is obvious from the definition of the Fourier transform.
+    We will suppose $ A = \sum_{ x \in X } \alpha_x P_x $ and
+    $ B = \sum_{ y \in X } \beta_y P_y $.
+    \begin{enumerate}[label=(\roman*)]
+        \setcounter{enumi}{1}
+        \item We first prove that $ (P_xP_y)^{\tau} = P_x^{\tau} \circ P_y^{\tau} $.
+        \[ (P_xP_y)^{\tau} = P_{x+y}^{\tau} = \sum_{ \chi \in X^* }
+            \chi(x+y) P_{\chi} = \sum_{ \chi \in X^* } \chi(x)\chi(y) P_{\chi}
+            = P_x \circ P_y
+        \]
+        From this it follows that
+        \[
+            \begin{split}
+            (AB)^{\tau} = \sum_{ x \in X } \sum_{ y \in X } \overline{\alpha_x}
+            \overline{\beta_y} (P_xP_y)^{\tau} =
+            \sum_{ x \in X } \sum_{ y \in X } \overline{\alpha_x}
+            \overline{\beta_y} P_x^{\tau} \circ P_y^{\tau} &=
+            \left ( \sum_{ x \in X } \alpha_x P_x \right )^{\tau} \circ
+            \left ( \sum_{ y \in X } \beta_y P_y \right )^{\tau}  \\
+                        &=A^{\tau} \circ B^{\tau}
+            \end{split}
+        \]
+        We now show that $ (A \circ B)^{\tau} = |X|^{-1}A^{\tau}B^{\tau} $.
+        We first prove that $ (P_x \circ P_y)^{\tau} = |X|^{-1}
+        P_x^{\tau}P_y^{\tau} $.
+
+        Suppose $ x=y $. Since $ P_x \circ P_x = P_x $, we have that
+        \[
+            P_x^{\tau} P_x^{\tau} = \sum_{ \chi \in X^* } \sum_{ \eta \in X^* }
+            \chi(x) \eta(x) P_{\chi} P_{\eta} =
+            \sum_{ \chi \in X^* } \sum_{ \eta \in X^* }
+            (\chi\eta)(x) P_{\chi\eta} =
+            |X| \sum_{ \chi \in X^* } \chi(x) P_{\chi} = |X| P_x \circ P_x
+        \]
+
+        Now suppose $ x \neq y $. Then, since $ P_x \circ P_y = 0 $
+        \[
+            P_x^{\tau} P_y^{\tau} = \sum_{ \chi \in X^* } \sum_{ \eta \in X^* }
+            \chi(x) \eta(y) P_{\chi} P_{\eta} =
+            \sum_{ \chi \in X^* } \sum_{ \eta \in X^* }
+            (\chi\eta)(x) P_{\chi\eta} =
+            |X| \sum_{ \chi \in X^* } \chi(x) P_{\chi} = |X| P_x \circ P_x
+        \]
+    \end{enumerate}
+\end{proof}
+
+We can now prove that the dual scheme is a translation association scheme.
+
+\begin{theorem}[Theorem 2.2.10, \cite{brouwer_distance-regular_1989}]
+    For any $ d $-class translation association scheme $ (X,\mathcal{R}) $, with
+    eigenmatrices $ P,Q $, the dual scheme $ (X^*, \mathcal{R}) $ is a $ d $-class
+    translation associaion scheme with eigenmatrices $ P^* = Q $, $ Q^* = P $.
+
+    Furthermore, it holds that
+    \begin{equation}
+        Q_{ij} = \sum_{ \chi \in N_j^* } \chi(x) \text{ for any } x \in N_i
+        \label{eq:qval_sum_char}
+    \end{equation}
+    and that
+    \begin{equation}
+        E_j = |X|^{-1} \sum_{ x \in X } \sum_{ \chi \in N_j^* } \chi(x)P_x
+        \label{eq:Ej_perm_mat_sum}
+    \end{equation}
+    \label{th:tas_dual}
+\end{theorem}
+\begin{proof}
+
+    We start by showing that $ A_i^* = E_i^{\tau} $ for all
+    $ i \in \{ 0,1,\dots,d \} $. Let us fix any $ (\chi,\psi) \in R_k^* $ and
+    call $ \nu = \chi^{-1}\psi \in N_k^* $. Then, applying first \ref{lm:Ai_as_sum_of_perm}
+    and then \eqref{eq:pval_char_sum}, we get that
+    \begin{equation*}
+        \begin{split}
+            (E_i^{\tau})_{\chi\psi} &=
+            |X|^{-1}\sum_{ j=0 }^{ d } \overline{q_i(j)}(A_j^{\tau})_{\chi\psi} =
+            |X|^{-1} \sum_{ j=0 }^{ d }\overline{q_i(j)}
+                \sum_{ x \in N_j }(P_x^{\tau})_{\chi\psi} = \\
+            &= |X|^{-1} \sum_{ j=0 }^{ d }\overline{q_i(j)}
+                \sum_{ x \in N_j }(P_x^{\tau})_{\chi\psi}
+            = |X|^{-1} \sum_{ j=0 }^{ d }\overline{q_i(j)}\sum_{ x \in N_j }
+            \sum_{ \eta \in X^* }\overline{\eta(x)}(P_{\eta})_{\chi\psi} = \\
+            &= |X|^{-1} \sum_{ j=0 }^{ d }\overline{q_i(j)}
+            \sum_{ l=0 }^{ d } \sum_{ \eta \in X_l^* }(P_{\eta})_{\chi\psi}
+                \sum_{ x \in N_j } \overline{\eta(x)}
+            = |X|^{-1} \sum_{ j=0 }^{ d }\overline{q_i(j)}
+            \sum_{ l=0 }^{ d } \sum_{ \eta \in X_l^* } \overline{p_{j}(l)}
+                (P_{\eta})_{\chi\psi}
+        \end{split}
+    \end{equation*}
+    Note that $ (P_{\nu})_{\chi\psi} $ is $ 1 $ since $ \nu = \chi^{-1}\psi =
+    \psi\chi^{-1} \iff \psi = \nu\chi $. Applying this and
+    \ref{prop:association_schemes_pq_identity}, we get that
+    \[
+        (E_i^{\tau})_{\chi\psi} = |X|^{-1}\overline{\sum_{ j=0 }^{ d }
+        q_i(j)p_{j}(k)} = \delta_{ik}
+    \]
+    Therefore, $ (E_i^{\tau})_{\chi,\psi} $ is $ 1 $ if
+    $ (\chi,\psi) \in R_i^* $ and 0 otherwise, which implies $ E_i^{\tau} = A_i^* $.
+
+    We have that $ (\mathbb{C}(\mathcal{A}))^{\tau} =
+    \langle A_0^*, A_1^*, \dots, A_d^* \rangle_{\mathbb{C}} $. We will now show
+    that $ X^* $ holds the properties of a translation association scheme:
+    \begin{enumerate}[label=(\roman*)]
+        \item To show that $ R^* = \{ R_0, R_1, \dots, R_d \} $ partitions
+            $ X^* \times X^* $, we note that every $ \nu \in X^* $ is an
+            eigenvector of $ A_j $, which implies that it must be in the column
+            space of some $ E_i $. It is easy to check that the column spaces of
+            idempotent matrices give eigenvectors of eigenvalue $ 1 $.
+        \item Since $ E_0 = |X|^{-1}J $, it is clear that $ E_0 v = v $ if and
+            only if $ v = 0 $, hence $ R^*_0 = \{ (\chi,\chi) \mid \chi \in X^* \} $.
+        \item Note that $ \psi^{-1}\chi = \overline{\chi^{-1}\psi} $. Therefore,
+            if $ (\chi,\psi) \in R_i^* $, that is, $ \chi^{-1}\psi $ is in the
+            column space of $ E_i $, it is clear that $ \psi^{-1}\chi $ must
+            also be in the column space of $ E_i $, and thus
+            $ (\psi,\chi) \in R_i^* $.
+        \item From \ref{prop:gamma_properties}, we get that
+            \[ A_i^* A_j^* = E_i^{\tau}E_j^{\tau} = |X|(E_i \circ E_j)^{\tau} \]
+            which is in $ \mathbb{C}(\mathcal{A}^*) = \mathbb{C}(\mathcal{A})^{\tau} $
+            since, by \ref{th:idemp_mat_properties}, $ E_j \circ E_i $ is in
+            $ \mathbb{C}(\mathcal{A}) $.
+        \item Let us fix $ (\chi,\psi) \in R_i^* $. For any $ \eta \in X^* $,
+        \[
+            E_i((\chi\eta)^{-1}\psi\eta) = E_i(\chi^{-1}\psi) = \chi^{-1}\psi =
+            \eta^{-1}\chi^{-1}\psi\eta = (\eta\chi)^{-1}(\psi\eta)
+        \]
+        and so $ (\chi\eta, \psi\eta) \in R_i^* $.
+    \end{enumerate}
+    This proves that $ X^* $ is, in fact, a translation association scheme.
+
+    Since we can identify $ X^{**} $ with $ X $, it must now also hold that
+    \[ A_i = A_i^{**} = (E_i^*)^{\tau}  \]
+    Thus,
+    \[
+        |X| E_i^* = ((E_i^*)^{\tau})^{\tau} = A_i^{\tau}
+        \left ( \sum_{ j=0 }^{ d } p_i(j) E_j \right )^{\tau} =
+        \sum_{ j=0 }^{ d } \overline{p_i(j)}E_j^{\tau} =
+        \sum_{ j=0 }^{ d } p_i(j) A_i^*
+    \]
+    and so $ Q^* = P $. Furthermore, $ Q = Q^{**} = P^* $.
+
+    It is now clear that equation \eqref{eq:qval_sum_char} follows from
+    \eqref{eq:pval_char_sum}. We may concude that
+    \[
+        \begin{split}
+        E_j = |X|^{-1} \sum_{ i=0 }^{ d } q_j(i)A_i = |X|^{-1}
+        |X|^{-1} \sum_{ i=0 }^{ d } Q_{ij}A_i &=
+        |X|^{-1} \sum_{ i=0 }^{ d } \left ( \sum_{ \chi \in N_j^*} \chi(x) \right )
+            \left ( \sum_{ x \in N_i} P_x \right ) = \\
+        &= |X|^{-1} \sum_{ x \in X } P_x \left ( \sum_{ \chi \in N_j^*} \chi(x) \right )
+        \end{split}
+    \]
+\end{proof}
+
+In the context of additive codes in translation association schemes, the concept
+of duality takes on a different meaning:
+\begin{definition}
+    Let $ Y $ be an additive code of the translation association scheme
+    $ (X,\mathcal{R}) $ . We define the \textbf{dual code} $ Y' $ of $ Y $ as the
+    subgroup
+    \[ Y' = \{ \chi \in X^* \mid \chi(y) = 1 \text{ for all } y \in Y \} =
+    \{ y' \in X \mid  y \cdot y' = 1 \text{ for all } y \in Y \}\]
+\end{definition}
+
+The dual code of $ Y $ is defined in such a way
+that their inner distribution is determined by the inner distribution of their
+dual, namely:
+\begin{theorem}[{\parencite[Theorem 2.10.12]{brouwer_distance-regular_1989}}]
+    Let $ Y $ be an additive code $ Y $ of a translation association
+    scheme $ (X, \mathcal{R}) $. Then, the inner distributions $ a,a^* $ of
+    $ Y $ and its dual code $ Y' $ are related by the formulae
+    \begin{equation*}
+        a' = \frac{1}{|Y|}aQ, \quad a = \frac{|Y|}{|X|}a'P
+    \end{equation*}
+    \label{th:add_tas_inner_dist}
+\end{theorem}
+\begin{proof}
+    We start by proving that for translation association schemes the inner
+    distribution can actually be expressed as $ a_i = |N_i^* \cap Y| $:
+    for every $ y \in N_i^* \cap Y $, every $ z \in Y $ gives a different
+    $ (z,y+z) $ in $ (Y \times Y) \cap R_i $.
+
+    Now, to prove the formulae above, we fix a $ k \in \{ 0,1,\dots,d \} $ and
+    develop
+    \[ |Y|^2a_k = |Y|^2 |Y'\cap N_k^*| \]
+    Note that
+    from \ref{prop:sum_char_tas} we get that the previous expression above is
+    equal to
+    \[
+        \sum_{ \nu \in N_k^* }\sum_{ y\in Y } |Y|\nu(y) =
+        \sum_{ \nu \in N_k^* } \sum_{ y \in Y } \nu(Y) (\sum_{ z \in Y } \nu(-z)) =
+        \sum_{ \nu \in N_k^* } \sum_{ y,z \in Y } \nu(Y-z)
+    \]
+    From \ref{th:tas_dual}, we get that this is equal to
+    \[ |X| \boldsymbol{x_Y}^TE_k\boldsymbol{x_Y} \]
+    and, from \ref{lm:in_out_dist}, this equals
+    \[ |Y|(aQ)_k \]
+
+\end{proof}
+This last proposition, when applied to the translation association scheme obtained
+over matrices with the rank distance, gives an analog of the
+\textit{MacWilliams identities} established for classical codes.
+
+\newpage
+\printbibliography
+
+\end{document}

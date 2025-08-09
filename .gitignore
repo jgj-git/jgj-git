@@ -1,0 +1,13 @@
+_site
+_site/*
+*jekyll*
+# Ignore everything in docs/
+docs/*
+docs/translation_association_schemes/*
+# Don't ignore the docs folder itself
+!docs/
+# But keep .pdf and .tex files
+!docs/translation_association_schemes
+!docs/translation_association_schemes/*.pdf
+!docs/translation_association_schemes/*.tex
+!docs/translation_association_schemes/*.bib
